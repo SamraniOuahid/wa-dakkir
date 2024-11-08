@@ -1,0 +1,381 @@
+:root {
+    --primary-color: #1a4a1c;
+    --secondary-color: #2c5f2e;
+    --gold: #d4af37;
+    --cream: #f8f6f0;
+    --dark: #2c3e50;
+    --shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Amiri', serif;
+    background: var(--cream);
+    color: var(--dark);
+    direction: rtl;
+    line-height: 1.6;
+}
+
+/* Header Style */
+header {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    position: relative;
+    padding: 4rem 2rem;
+    text-align: center;
+    overflow: hidden;
+}
+
+header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url('path/to/islamic-pattern.png');
+    opacity: 0.1;
+    pointer-events: none;
+}
+
+header h1 {
+    color: white;
+    font-size: 3.5rem;
+    margin-bottom: 1rem;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+}
+
+.subtitle {
+    color: var(--cream);
+    font-size: 1.6rem;
+    opacity: 0.9;
+}
+
+/* Container */
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+/* Quran Section */
+.quran-section {
+    background: white;
+    border-radius: 20px;
+    padding: 2rem;
+    margin: 2rem auto;
+    box-shadow: var(--shadow);
+    position: relative;
+    overflow: hidden;
+}
+
+.quran-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 5px;
+    background: linear-gradient(90deg, var(--gold), var(--primary-color));
+}
+
+.quran-section h2 {
+    color: var(--primary-color);
+    font-size: 2.5rem;
+    text-align: center;
+    margin-bottom: 2rem;
+    position: relative;
+}
+
+.quran-section h2::after {
+    content: '۞';
+    display: block;
+    color: var(--gold);
+    font-size: 2rem;
+    margin-top: 0.5rem;
+}
+
+/* Controls Style */
+.quran-controls {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.select-wrapper {
+    position: relative;
+}
+
+.select-wrapper label {
+    display: block;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+    font-size: 1.1rem;
+}
+
+.quran-select {
+    width: 100%;
+    padding: 1rem;
+    border: 2px solid rgba(0,0,0,0.1);
+    border-radius: 10px;
+    background: white;
+    color: var(--dark);
+    font-family: 'Amiri', serif;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.quran-select:hover {
+    border-color: var(--primary-color);
+}
+
+.quran-select:focus {
+    outline: none;
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.2);
+}
+
+/* Audio Player Style */
+.audio-player {
+    background: linear-gradient(145deg, #ffffff, #f3f3f3);
+    border-radius: 20px;
+    padding: 25px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    max-width: 800px;
+    margin: 20px auto;
+}
+
+.player-controls {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    position: relative;
+}
+
+/* Bouton Play/Pause */
+.player-btn {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: none;
+    background: linear-gradient(145deg, #1a4a1c, #2c5f2e);
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(26, 74, 28, 0.3);
+}
+
+.player-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 20px rgba(26, 74, 28, 0.4);
+}
+
+.player-btn i {
+    font-size: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+/* Barre de progression */
+.progress-bar {
+    flex: 1;
+    height: 8px;
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+    position: relative;
+    cursor: pointer;
+    overflow: hidden;
+}
+
+.progress {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    background: linear-gradient(90deg, #1a4a1c, #2c5f2e);
+    border-radius: 4px;
+    transition: width 0.1s linear;
+}
+
+.progress-bar:hover::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: 0;
+    right: 0;
+    bottom: -2px;
+    background: rgba(26, 74, 28, 0.1);
+    border-radius: 4px;
+}
+
+/* Contrôle du volume */
+.volume-control {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 120px;
+}
+
+.volume-control i {
+    color: #1a4a1c;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.volume-control i:hover {
+    color: #2c5f2e;
+}
+
+.volume-slider {
+    width: 80px;
+    height: 4px;
+    -webkit-appearance: none;
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 2px;
+    outline: none;
+}
+
+.volume-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 12px;
+    height: 12px;
+    background: #1a4a1c;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.volume-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+}
+
+.volume-slider::-moz-range-thumb {
+    width: 12px;
+    height: 12px;
+    background: #1a4a1c;
+    border-radius: 50%;
+    cursor: pointer;
+    border: none;
+    transition: all 0.3s ease;
+}
+
+/* Affichage du temps */
+.time-display {
+    font-family: 'Amiri', serif;
+    color: #1a4a1c;
+    font-size: 0.9rem;
+    min-width: 100px;
+    text-align: center;
+}
+
+/* Ajout de boutons supplémentaires */
+.additional-controls {
+    display: flex;
+    gap: 10px;
+    margin-right: 15px;
+}
+
+.control-btn {
+    background: transparent;
+    border: none;
+    color: #1a4a1c;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.control-btn:hover {
+    background: rgba(26, 74, 28, 0.1);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    header {
+        padding: 2rem 1rem;
+    }
+
+    header h1 {
+        font-size: 2.5rem;
+    }
+
+    .subtitle {
+        font-size: 1.2rem;
+    }
+
+    .quran-controls {
+        grid-template-columns: 1fr;
+    }
+
+    .player-controls {
+        flex-direction: column;
+    }
+
+    .volume-control {
+        
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* Decorative Elements */
+.islamic-decoration {
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    background-image: url('path/to/islamic-ornament.png');
+    background-size: contain;
+    opacity: 0.1;
+}
+
+.top-right {
+    top: 20px;
+    right: 20px;
+}
+
+.bottom-left {
+    bottom: 20px;
+    left: 20px;
+}
+
+/* Animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.quran-section {
+    animation: fadeIn 0.8s ease-out;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--cream);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--secondary-color);
+}

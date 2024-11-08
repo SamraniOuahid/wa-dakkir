@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>القرآن الكريم</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://kit.fontawesome.com/YOUR_KIT_CODE.js" crossorigin="anonymous"></script>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#1a4a1c">
+    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+</head>
+<body>
+    <header>
+        <h1>المكتبة الإسلامية</h1>
+        <p class="subtitle">كنوز من أمهات الكتب وروائع المؤلفات</p>
+        <div class="categories-filter">
+            <button class="filter-btn active" data-category="all">الكل</button>
+            <button class="filter-btn" data-category="عقيدة">العقيدة</button>
+            <button class="filter-btn" data-category="فقه">الفقه</button>
+            <button class="filter-btn" data-category="تزكية">التزكية</button>
+            <button class="filter-btn" data-category="فكر">الفكر</button>
+            <button class="filter-btn" data-category="أدب">الأدب</button>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="quran-section">
+            <h2>اختر القارئ والسورة</h2>
+            
+            <div class="quran-controls">
+                <div class="select-wrapper">
+                    <label for="chooseReciter">اختر القارئ</label>
+                    <select id="chooseReciter" class="quran-select">
+                        <!-- Options will be added dynamically -->
+                    </select>
+                </div>
+                <div class="select-wrapper">
+                    <label for="chooseReciter">اختر الرواية</label>
+                    <select id="chooseMoshaf" class="quran-select">
+                        <!-- Options will be added dynamically -->
+                    </select>
+                </div>
+
+                <div class="select-wrapper">
+                    <label for="chooseSurah">اختر السورة</label>
+                    <select id="chooseSurah" class="quran-select">
+                        <!-- Options will be added dynamically -->
+                    </select>
+                </div>
+            </div>
+
+            <div class="audio-player">
+                <audio id="chooseAudio" style="display: none;">
+                    Votre navigateur ne supporte pas l'élément audio.
+                </audio>
+                
+                <div class="player-controls">
+                    <div class="additional-controls">
+                        
+                        
+                        <button id="playBtn" class="player-btn">
+                            ▶
+                        </button>
+                        
+                    </div>
+                    
+                    <div class="progress-bar">
+                        <div class="progress"></div>
+                    </div>
+                    
+                    <div class="volume-control">
+                        <i class="fas fa-volume-up"></i>
+                        <input type="range" class="volume-slider" min="0" max="100" value="100">
+                    </div>
+                    
+                    <span class="time-display">00:00 / 00:00</span>
+                </div>
+            </div>
+        </section>
+    </main>
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-analytics.js";
+        // TODO: Add SDKs for Firebase products that you want to use
+        // https://firebase.google.com/docs/web/setup#available-libraries
+      
+        // Your web app's Firebase configuration
+        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+        const firebaseConfig = {
+          apiKey: "AIzaSyAAUfLRSIk81PI-s5luD0LvzCylHgGwuts",
+          authDomain: "dikra-01.firebaseapp.com",
+          projectId: "dikra-01",
+          storageBucket: "dikra-01.firebasestorage.app",
+          messagingSenderId: "360292273048",
+          appId: "1:360292273048:web:54f7bc77634bb41595f9ed",
+          measurementId: "G-FB4TJEGSZ6"
+        };
+      
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+      </script>
+    <script src="script.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then(registration => {
+                        console.log('ServiceWorker enregistré');
+                    })
+                    .catch(error => {
+                        console.log('Erreur d\'enregistrement du ServiceWorker:', error);
+                    });
+            });
+        }
+    </script>
+</body>
+</html>

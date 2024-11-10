@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://wa-dakkir.web.app/sitemap.xml

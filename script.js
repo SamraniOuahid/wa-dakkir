@@ -1,462 +1,467 @@
+function checkForUpdates() {
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.ready.then(registration => {
+            registration.update();
+        });
+    }
+}
+
+// Vérifier les mises à jour toutes les 5 minutes
+setInterval(checkForUpdates, 300000);
+
+// Ajouter un événement pour détecter les nouvelles versions
+let refreshing = false;
+navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (!refreshing) {
+        refreshing = true;
+        showUpdateMessage();
+    }
+});
+
 const apiUrl = 'https://mp3quran.net/api/v3';
 const a = 'https://www.mp3quran.net/api/v3/reciters?language=eng' ;
 
 const reciter = 'reciters';
 const language= 'ar';
 
-async function getReciters() {
-    const chooseReciter = document.querySelector('#chooseReciter');
-    const res = await fetch(`${apiUrl}/${reciter}?language=${language}`);
-    const data = await res.json();
-    chooseReciter.innerHTML = '<option value="">اختر القارئ</option>';
-    data.reciters.forEach(reciter => chooseReciter.innerHTML += `<option value="${reciter.id}">${reciter.name}</option>` );
-    chooseReciter.addEventListener('change', e=>getMoshaf(e.target.value));
+let currentAudio = null; // Variable globale pour suivre l'audio en cours
+
+// Fonction de recherche des récitateurs
+function setupReciterSearch() {
+    const searchInput = document.getElementById('searchReciter');
+    const reciterSelect = document.getElementById('chooseReciter');
+    const chooseMoshaf = document.getElementById('chooseMoshaf');
+    const chooseSurah = document.getElementById('chooseSurah');
+    
+    searchInput.addEventListener('input', function() {
+        const searchText = this.value.toLowerCase();
+        let firstMatch = null;
+        
+        // Arrêter l'audio en cours s'il existe
+        if (currentAudio) {
+            currentAudio.pause();
+            currentAudio.remove();
+            currentAudio = null;
+        }
+
+        // Réinitialiser les sélecteurs
+        chooseMoshaf.innerHTML = '<option value="">اختر المصحف</option>';
+        chooseSurah.innerHTML = '<option value="">اختر السورة</option>';
+        
+        Array.from(reciterSelect.options).forEach((option, index) => {
+            if (index === 0) return;
+            
+            const reciterName = option.text.toLowerCase();
+            const isMatch = reciterName.includes(searchText);
+            
+            option.style.display = isMatch ? '' : 'none';
+            
+            if (isMatch && !firstMatch) {
+                firstMatch = option;
+            }
+        });
+        
+        // Si une correspondance est trouvée
+        if (firstMatch && searchText.length > 0) {
+            reciterSelect.value = firstMatch.value;
+            // Nettoyer l'audio container
+            const audioContainer = document.querySelector('.audio-container');
+            audioContainer.innerHTML = '';
+            // Charger le nouveau moshaf
+            getMoshaf(firstMatch.value);
+        }
+    });
 }
 
+// Modification de la fonction getReciters pour inclure la recherche
+async function getReciters() {
+    try {
+        const chooseReciter = document.querySelector('#chooseReciter');
+        const res = await fetch(`${apiUrl}/${reciter}?language=${language}`);
+        const data = await res.json();
+        
+        // Remplir le select avec les récitateurs
+        chooseReciter.innerHTML = '<option value="">اختر القارئ</option>';
+        data.reciters.forEach(reciter => {
+            chooseReciter.innerHTML += `<option value="${reciter.id}">${reciter.name}</option>`;
+        });
+        
+        // Ajouter l'écouteur d'événements pour le changement de récitateur
+        chooseReciter.addEventListener('change', e => getMoshaf(e.target.value));
+        
+        // Initialiser la recherche
+        setupReciterSearch();
+        
+    } catch (error) {
+        console.error('Erreur lors du chargement des récitateurs:', error);
+    }
+}
+
+// Appeler getReciters au chargement de la page
 getReciters();
 
 async function getMoshaf(reciterId) {
-    
-    const chooseMoshaf = document.querySelector('#chooseMoshaf');
-    const res = await fetch(`${apiUrl}/${reciter}?language=${language}&reciter=${reciterId}`);
-    const data = await res.json();
-    const moshafs = data.reciters[0].moshaf;
-    chooseMoshaf.innerHTML = '<option value="">اختر المصحف</option>';
-    moshafs.forEach(moshaf => chooseMoshaf.innerHTML += `<option value="${moshaf.id}" data-surahlist="${moshaf.surah_list}" data-server="${moshaf.server}" >${moshaf.name}</option>`);
-    
-    chooseMoshaf.addEventListener('change', e=>{
-        const selectedMoshaf = chooseMoshaf.options[chooseMoshaf.selectedIndex];
-        const surahServer = selectedMoshaf.dataset.server;
-        const surahList = selectedMoshaf.dataset.surahlist;
+    try {
+        const chooseMoshaf = document.querySelector('#chooseMoshaf');
+        const res = await fetch(`${apiUrl}/${reciter}?language=${language}&reciter=${reciterId}`);
+        const data = await res.json();
+        const moshafs = data.reciters[0].moshaf;
         
-        getSurah(surahServer, surahList);
-    });
+        chooseMoshaf.innerHTML = '<option value="">اختر المصحف</option>';
+        moshafs.forEach(moshaf => {
+            chooseMoshaf.innerHTML += `
+                <option value="${moshaf.id}" 
+                        data-server="${moshaf.server}"
+                        data-surahlist="${moshaf.surah_list}">
+                    ${moshaf.name}
+                </option>`;
+        });
+
+        // Sélectionner automatiquement le premier moshaf
+        if (moshafs.length > 0) {
+            const firstMoshaf = chooseMoshaf.querySelector('option:not(:first-child)');
+            if (firstMoshaf) {
+                firstMoshaf.selected = true;
+                const surahServer = firstMoshaf.dataset.server;
+                const surahList = firstMoshaf.dataset.surahlist;
+                getSurah(surahServer, surahList);
+            }
+        }
+    } catch (error) {
+        console.error('Erreur lors du chargement des moshaf:', error);
+    }
 }
+
 async function getSurah(surahServer, surahList) {
     const chooseSurah = document.querySelector('#chooseSurah');
-    const res = await fetch(`https://mp3quran.net/api/v3/suwar`);
-    const data = await res.json();
-    const surahNames = data.suwar;
     
-    // Vider le contenu précédent
-    chooseSurah.innerHTML = '<option value="">اختر السورة</option>';
+    // Cloner pour éviter les écouteurs multiples
+    const newChooseSurah = chooseSurah.cloneNode(true);
+    chooseSurah.parentNode.replaceChild(newChooseSurah, chooseSurah);
     
-    // Convertir surahList en tableau de nombres
-    const surahListArray = surahList.split(',').map(Number);
-    
-    // Pour chaque sourate disponible
-    surahListArray.forEach(surahNumber => {
-        // Trouver le nom de la sourate correspondante
-        const surahInfo = surahNames.find(surah => surah.id === surahNumber);
+    try {
+        const res = await fetch(`https://mp3quran.net/api/v3/suwar`);
+        const data = await res.json();
+        const surahNames = data.suwar;
         
-        if (surahInfo) {
-            // Formater le numéro de la sourate avec des zéros
-            const paddedNumber = surahNumber.toString().padStart(3, '0');
-            // Ajouter l'option au select
-            chooseSurah.innerHTML += `
-                <option value="${surahServer}${paddedNumber}.mp3">
-                    ${surahInfo.name}
-                </option>`;
-        }
-        chooseSurah.addEventListener('change', e=>{
-            const selectedSurah = chooseSurah.options[chooseSurah.selectedIndex];
-            playSurah(selectedSurah.value);
-
+        newChooseSurah.innerHTML = '<option value="">اختر السورة</option>';
+        
+        const surahListArray = surahList.split(',').map(Number);
+        
+        surahListArray.forEach(surahNumber => {
+            const surahInfo = surahNames.find(surah => surah.id === surahNumber);
+            
+            if (surahInfo) {
+                const paddedNumber = surahNumber.toString().padStart(3, '0');
+                newChooseSurah.innerHTML += `
+                    <option value="${surahServer}${paddedNumber}.mp3">
+                        ${surahInfo.name}
+                    </option>`;
+            }
         });
-    });
+
+        // Écouteur d'événements optimisé
+        newChooseSurah.addEventListener('change', e => {
+            const selectedValue = e.target.value;
+            if (selectedValue) {
+                playSurah(selectedValue);
+            }
+        });
+    } catch (error) {
+        console.error('Erreur lors du chargement des sourates:', error);
+        newChooseSurah.innerHTML = '<option value="">Erreur de chargement</option>';
+    }
 }
 
 function playSurah(surahMp3) {
-    const audio = document.querySelector('#chooseAudio');
-    audio.src = surahMp3;
-    audio.play();
-}
-// async function getAudio(surahId) {
-//     const chooseAudio = document.querySelector('#chooseAudio');
-//     const res = await fetch(`${apiUrl}/suwar?language=${language}&moshaf=${moshafId}&surah=${surahId}`);
-//     const data = await res.json();
-//     console.log(data);
-// }
-// async function initQuranPlayer() {
-//     const languageSelect = document.getElementById('languageSelect');
-//     const reciterSelect = document.getElementById('reciterSelect');
-//     const surahSelect = document.getElementById('surahSelect');
-//     const audio = document.getElementById('quranAudio');
-//     const playBtn = document.getElementById('playBtn');
-    
-//     // Charger les langues
-//     try {
-//         const response = await fetch('https://mp3quran.net/api/v3/languages');
-//         const data = await response.json();
-        
-//         data.language.forEach(lang => {
-//             const option = document.createElement('option');
-//             option.value = lang.id;
-//             option.textContent = lang.native;
-//             languageSelect.appendChild(option);
-//         });
-        
-//         languageSelect.disabled = false;
-//     } catch (error) {
-//         console.error('Erreur lors du chargement des langues:', error);
-//     }
-    
-//     // Événement de changement de langue
-//     languageSelect.addEventListener('change', async () => {
-//         const langId = languageSelect.value;
-//         if (!langId) return;
-        
-//         reciterSelect.innerHTML = '<option value="">اختر القارئ</option>';
-//         surahSelect.innerHTML = '<option value="">اختر السورة</option>';
-        
-//         try {
-//             const response = await fetch(`https://mp3quran.net/api/v3/reciters?language=${langId}`);
-//             const data = await response.json();
-            
-//             data.reciters.forEach(reciter => {
-//                 const option = document.createElement('option');
-//                 option.value = reciter.id;
-//                 option.textContent = reciter.name;
-//                 reciterSelect.appendChild(option);
-//             });
-            
-//             reciterSelect.disabled = false;
-//             surahSelect.disabled = true;
-//             playBtn.disabled = true;
-//         } catch (error) {
-//             console.error('Erreur lors du chargement des récitateurs:', error);
-//         }
-//     });
-    
-//     // Événement de changement de récitateur
-//     reciterSelect.addEventListener('change', async () => {
-//         const reciterId = reciterSelect.value;
-//         if (!reciterId) return;
-        
-//         surahSelect.innerHTML = '<option value="">اختر السورة</option>';
-        
-//         try {
-//             const response = await fetch(`https://mp3quran.net/api/v3/suwar`);
-//             const data = await response.json();
-            
-//             data.suwar.forEach(surah => {
-//                 const option = document.createElement('option');
-//                 option.value = surah.id;
-//                 option.textContent = `${surah.id}. ${surah.name}`;
-//                 surahSelect.appendChild(option);
-//             });
-            
-//             surahSelect.disabled = false;
-//             playBtn.disabled = true;
-//         } catch (error) {
-//             console.error('Erreur lors du chargement des sourates:', error);
-//         }
-//     });
-    
-//     // Événement de changement de sourate
-//     surahSelect.addEventListener('change', async () => {
-//         const surahId = surahSelect.value;
-//         if (!surahId) return;
-        
-//         const reciterId = reciterSelect.value;
-//         try {
-//             const response = await fetch(`https://mp3quran.net/api/v3/reciters?reciter=${reciterId}`);
-//             const data = await response.json();
-//             const reciter = data.reciters[0];
-            
-//             // Construire l'URL correcte avec le serveur et le dossier du récitateur
-//             const audioUrl = `${reciter.moshaf[0].server}${reciter.moshaf[0].surah_list}/${surahId.padStart(3, '0')}.mp3`;
-            
-//             audio.src = audioUrl;
-//             playBtn.disabled = false;
-//         } catch (error) {
-//             console.error('Erreur lors du chargement de l\'audio:', error);
-//         }
-//     });
-    
-//     // Contrôles du lecteur
-//     playBtn.addEventListener('click', () => {
-//         if (audio.paused) {
-//             audio.play();
-//             playBtn.innerHTML = '<i class="fas fa-pause"></i>';
-//         } else {
-//             audio.pause();
-//             playBtn.innerHTML = '<i class="fas fa-play"></i>';
-//         }
-//     });
-    
-//     // Mise à jour de la barre de progression
-//     audio.addEventListener('timeupdate', () => {
-//         const progress = document.querySelector('.progress');
-//         const timeDisplay = document.querySelector('.time-display');
-        
-//         const percent = (audio.currentTime / audio.duration) * 100;
-//         progress.style.width = `${percent}%`;
-        
-//         const currentMinutes = Math.floor(audio.currentTime / 60);
-//         const currentSeconds = Math.floor(audio.currentTime % 60);
-//         const totalMinutes = Math.floor(audio.duration / 60) || 0;
-//         const totalSeconds = Math.floor(audio.duration % 60) || 0;
-        
-//         timeDisplay.textContent = `${String(currentMinutes).padStart(2, '0')}:${String(currentSeconds).padStart(2, '0')} / ${String(totalMinutes).padStart(2, '0')}:${String(totalSeconds).padStart(2, '0')}`;
-//     });
-    
-//     // Clic sur la barre de progression
-//     document.querySelector('.progress-bar').addEventListener('click', (e) => {
-//         const progressBar = e.currentTarget;
-//         const clickPosition = e.offsetX;
-//         const totalWidth = progressBar.offsetWidth;
-//         const percent = clickPosition / totalWidth;
-        
-//         audio.currentTime = audio.duration * percent;
-//     });
-// }
-
-// document.addEventListener('DOMContentLoaded', () => {
-//     initQuranPlayer();
-//     const cards = document.querySelectorAll('.book-card');
-    
-//     // Animation d'entrée progressive
-//     cards.forEach((card, index) => {
-//         card.style.animationDelay = `${index * 0.15}s`;
-//     });
-
-//     // Animation des boutons d'achat avec effets améliorés
-//     const buyButtons = document.querySelectorAll('.buy-btn');
-//     buyButtons.forEach(button => {
-//         button.addEventListener('click', (e) => {
-//             const btn = e.target;
-            
-//             // Création d'effet d'onde
-//             const ripple = document.createElement('span');
-//             ripple.classList.add('ripple');
-//             btn.appendChild(ripple);
-            
-//             // Position de l'effet d'onde
-//             const rect = btn.getBoundingClientRect();
-//             const x = e.clientX - rect.left;
-//             const y = e.clientY - rect.top;
-//             ripple.style.left = x + 'px';
-//             ripple.style.top = y + 'px';
-            
-//             // Animation du bouton
-//             btn.innerHTML = '✓ Ajouté au panier';
-//             btn.style.background = '#27ae60';
-//             btn.style.transform = 'scale(1.1)';
-            
-//             // Animation de la carte
-//             const card = btn.closest('.book-card');
-//             card.style.transform = 'translateY(-15px)';
-            
-//             setTimeout(() => {
-//                 btn.style.transform = 'scale(1)';
-//                 card.style.transform = 'translateY(0)';
-//                 ripple.remove();
-//             }, 600);
-            
-//             setTimeout(() => {
-//                 btn.innerHTML = 'Acheter';
-//                 btn.style.background = '#3498db';
-//             }, 2000);
-//         });
-//     });
-
-//     // Animation au scroll
-//     const observerOptions = {
-//         threshold: 0.1
-//     };
-
-//     const observer = new IntersectionObserver((entries) => {
-//         entries.forEach(entry => {
-//             if (entry.isIntersecting) {
-//                 entry.target.style.opacity = '1';
-//                 entry.target.style.transform = 'translateY(0)';
-//             }
-//         });
-//     }, observerOptions);
-
-//     cards.forEach(card => {
-//         observer.observe(card);
-//     });
-
-//     // Animation au survol
-//     cards.forEach(card => {
-//         card.addEventListener('mousemove', (e) => {
-//             const rect = card.getBoundingClientRect();
-//             const x = e.clientX - rect.left;
-//             const y = e.clientY - rect.top;
-            
-//             const shine = `radial-gradient(circle at ${x}px ${y}px, rgba(255,255,255,0.2), transparent)`;
-//             card.style.backgroundImage = shine;
-//         });
-        
-//         card.addEventListener('mouseleave', () => {
-//             card.style.backgroundImage = 'none';
-//         });
-//     });
-
-//     // Animation du bouton d'achat
-//     const buyButtons = document.querySelectorAll('.buy-btn');
-//     buyButtons.forEach(button => {
-//         button.addEventListener('click', (e) => {
-//             const btn = e.target;
-//             btn.innerHTML = 'تمت الإضافة ✓';
-//             btn.style.background = 'linear-gradient(45deg, #2c5f2e, #1a4a1c)';
-            
-//             setTimeout(() => {
-//                 btn.innerHTML = 'اشتري الآن';
-//                 btn.style.background = 'linear-gradient(45deg, #1a4a1c, #2c5f2e)';
-//             }, 2000);
-//         });
-//     });
-
-//     // Sélectionner tous les boutons de filtre et les cartes de livres
-//     const filterButtons = document.querySelectorAll('.filter-btn');
-//     const bookCards = document.querySelectorAll('.book-card');
-
-//     // Fonction pour filtrer les livres
-//     function filterBooks(category) {
-//         bookCards.forEach(card => {
-//             // Récupérer la catégorie de la carte
-//             const cardCategory = card.dataset.category;
-            
-//             // Si la catégorie est "all" ou correspond à la catégorie de la carte
-//             if (category === 'all' || cardCategory === category) {
-//                 // Afficher la carte avec animation
-//                 card.style.display = 'block';
-//                 setTimeout(() => {
-//                     card.style.opacity = '1';
-//                     card.style.transform = 'scale(1) translateY(0)';
-//                 }, 10);
-//             } else {
-//                 // Cacher la carte avec animation
-//                 card.style.opacity = '0';
-//                 card.style.transform = 'scale(0.8) translateY(50px)';
-//                 setTimeout(() => {
-//                     card.style.display = 'none';
-//                 }, 300);
-//             }
-//         });
-//     }
-
-//     // Ajouter les écouteurs d'événements aux boutons
-//     filterButtons.forEach(button => {
-//         button.addEventListener('click', () => {
-//             // Retirer la classe active de tous les boutons
-//             filterButtons.forEach(btn => btn.classList.remove('active'));
-            
-//             // Ajouter la classe active au bouton cliqué
-//             button.classList.add('active');
-            
-//             // Filtrer les livres selon la catégorie
-//             const category = button.dataset.category;
-//             filterBooks(category);
-//         });
-//     });
-// });
-
-document.addEventListener('DOMContentLoaded', () => {
-    const audio = document.getElementById('chooseAudio');
-    const playBtn = document.getElementById('playBtn');
-    const progressBar = document.querySelector('.progress-bar');
-    const progress = document.querySelector('.progress');
-    const timeDisplay = document.querySelector('.time-display');
-    const volumeSlider = document.querySelector('.volume-slider');
-    const volumeIcon = document.querySelector('.volume-control i');
-
-    // Fonction pour formater le temps (00:00)
-    function formatTime(seconds) {
-        const minutes = Math.floor(seconds / 60);
-        const remainingSeconds = Math.floor(seconds % 60);
-        return `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
+    // Arrêter l'audio en cours immédiatement
+    if (currentAudio) {
+        currentAudio.pause();
+        currentAudio.remove();
     }
 
-    // Contrôle Play/Pause
-    playBtn.addEventListener('click', () => {
-        if (audio.paused) {
-            audio.play();
-            playBtn.innerHTML = '<i class="fas fa-pause"></i>';
-        } else {
-            audio.pause();
-            playBtn.innerHTML = '<i class="fas fa-play"></i>';
-        }
-    });
+    const audioContainer = document.querySelector('.audio-container');
+    
+    // Créer et configurer le nouvel audio avec le bouton de téléchargement
+    audioContainer.innerHTML = `
+        <div class="audio-wrapper">
+            <audio id="chooseAudio" controls>
+                <source src="${surahMp3}" type="audio/mpeg">
+                Your browser does not support the audio element.
+            </audio>
+            <button class="download-btn" onclick="downloadAudio('${surahMp3}', '${getSurahName()}')">
+                <i class="fas fa-download"></i> تحميل
+            </button>
+        </div>
+    `;
 
-    // Mise à jour de la barre de progression
-    audio.addEventListener('timeupdate', () => {
-        const percent = (audio.currentTime / audio.duration) * 100;
-        progress.style.width = `${percent}%`;
+    // Démarrer la lecture
+    const playPromise = audioContainer.querySelector('audio').play();
+    
+    if (playPromise !== undefined) {
+        playPromise.catch(error => {
+            console.error('Erreur de lecture:', error);
+        });
+    }
+
+    currentAudio = audioContainer.querySelector('audio');
+
+    currentAudio.onerror = () => {
+        console.error('Erreur de chargement audio');
+        audioContainer.innerHTML = `
+            <div class="error-message">
+                Erreur de chargement de l'audio. Veuillez réessayer.
+            </div>
+        `;
+        currentAudio = null;
+    };
+}
+
+// Fonction pour obtenir le nom de la sourate sélectionnée
+function getSurahName() {
+    const surahSelect = document.querySelector('#chooseSurah');
+    const selectedOption = surahSelect.options[surahSelect.selectedIndex];
+    return selectedOption.text || 'surah';
+}
+
+// Fonction de téléchargement améliorée
+async function downloadAudio(audioUrl, surahName) {
+    try {
+        const response = await fetch(audioUrl);
+        const blob = await response.blob();
         
-        // Mise à jour du temps
-        const currentTime = formatTime(audio.currentTime);
-        const duration = formatTime(audio.duration || 0);
-        timeDisplay.textContent = `${currentTime} / ${duration}`;
-    });
-
-    // Cliquer sur la barre de progression pour changer la position
-    progressBar.addEventListener('click', (e) => {
-        const rect = progressBar.getBoundingClientRect();
-        const percent = (e.clientX - rect.left) / rect.width;
-        audio.currentTime = percent * audio.duration;
-    });
-
-    // Contrôle du volume
-    volumeSlider.addEventListener('input', (e) => {
-        const value = e.target.value;
-        audio.volume = value / 100;
+        // Créer un objet URL pour le blob
+        const blobUrl = window.URL.createObjectURL(blob);
         
-        // Changer l'icône du volume en fonction du niveau
-        if (value == 0) {
-            volumeIcon.className = 'fas fa-volume-mute';
-        } else if (value < 50) {
-            volumeIcon.className = 'fas fa-volume-down';
-        } else {
-            volumeIcon.className = 'fas fa-volume-up';
+        // Créer un lien temporaire
+        const link = document.createElement('a');
+        link.href = blobUrl;
+        link.download = `${surahName}.mp3`; // Nom du fichier avec le nom de la sourate
+        
+        // Déclencher le téléchargement
+        document.body.appendChild(link);
+        link.click();
+        
+        // Nettoyer
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(blobUrl);
+        
+    } catch (error) {
+        console.error('Erreur lors du téléchargement:', error);
+        alert('Erreur lors du téléchargement. Veuillez réessayer.');
+    }
+}
+
+// Ajouter ces styles CSS pour l'animation de rotation
+const styles = `
+    @keyframes rotate {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+
+    .rotating {
+        animation: rotate 4s linear infinite;
+    }
+
+    .play-button {
+        transition: background-color 0.3s ease;
+    }
+
+    .play-button:hover {
+        opacity: 0.9;
+    }
+`;
+
+// Ajouter les styles au document
+const styleSheet = document.createElement("style");
+styleSheet.textContent = styles;
+document.head.appendChild(styleSheet);
+
+// Fonction pour initialiser l'état de la batterie
+async function initBatteryStatus() {
+    try {
+        if (!navigator.getBattery) {
+            throw new Error('API Batterie non supportée');
         }
-    });
 
-    // Cliquer sur l'icône du volume pour muter/démuter
-    volumeIcon.addEventListener('click', () => {
-        if (audio.volume > 0) {
-            audio.dataset.previousVolume = audio.volume;
-            audio.volume = 0;
-            volumeSlider.value = 0;
-            volumeIcon.className = 'fas fa-volume-mute';
-        } else {
-            const previousVolume = audio.dataset.previousVolume || 1;
-            audio.volume = previousVolume;
-            volumeSlider.value = previousVolume * 100;
-            volumeIcon.className = previousVolume < 0.5 ? 'fas fa-volume-down' : 'fas fa-volume-up';
-        }
-    });
+        const battery = await navigator.getBattery();
+        
+        // Mise à jour initiale
+        updateBatteryStatus(battery);
 
-    // Gestion des raccourcis clavier
-    document.addEventListener('keydown', (e) => {
-        if (e.code === 'Space') {
-            e.preventDefault();
-            playBtn.click();
-        } else if (e.code === 'ArrowLeft') {
-            audio.currentTime = Math.max(0, audio.currentTime - 5);
-        } else if (e.code === 'ArrowRight') {
-            audio.currentTime = Math.min(audio.duration, audio.currentTime + 5);
-        } else if (e.code === 'ArrowUp') {
-            volumeSlider.value = Math.min(100, parseInt(volumeSlider.value) + 10);
-            volumeSlider.dispatchEvent(new Event('input'));
-        } else if (e.code === 'ArrowDown') {
-            volumeSlider.value = Math.max(0, parseInt(volumeSlider.value) - 10);
-            volumeSlider.dispatchEvent(new Event('input'));
-        }
-    });
+        // Écouteurs d'événements pour les changements
+        battery.addEventListener('levelchange', () => updateBatteryStatus(battery));
+        battery.addEventListener('chargingchange', () => updateBatteryStatus(battery));
 
-    // Gestion de la fin de l'audio
-    audio.addEventListener('ended', () => {
-        playBtn.innerHTML = '<i class="fas fa-play"></i>';
-        progress.style.width = '0%';
-    });
+    } catch (error) {
+        console.error('Erreur de batterie:', error);
+        // Afficher un état par défaut en cas d'erreur
+        updateBatteryUI('--', false);
+    }
+}
 
-    // Gestion des erreurs
-    audio.addEventListener('error', () => {
-        console.error('Erreur de lecture audio');
-        playBtn.innerHTML = '<i class="fas fa-play"></i>';
-    });
+// Fonction pour mettre à jour l'état de la batterie
+function updateBatteryStatus(battery) {
+    // Convertir le niveau en pourcentage
+    const level = Math.round(battery.level * 100);
+    const isCharging = battery.charging;
+    
+    // Mettre à jour l'interface
+    updateBatteryUI(level, isCharging);
+}
+
+// Fonction pour mettre à jour l'interface utilisateur
+function updateBatteryUI(level, isCharging) {
+    const batteryIcon = document.querySelector('.battery-icon');
+    const batteryLevel = document.querySelector('.battery-level');
+    const batteryStatus = document.querySelector('.battery-status');
+
+    if (!batteryIcon || !batteryLevel || !batteryStatus) {
+        console.error('Éléments de batterie non trouvés');
+        return;
+    }
+
+    // Mettre à jour le texte du niveau
+    batteryLevel.textContent = level === '--' ? level : `${level}%`;
+
+    // Déterminer l'icône et la couleur
+    let icon, color;
+    if (isCharging) {
+        icon = '<i class="fas fa-bolt"></i>';
+        color = '#ffd700';
+    } else if (level <= 20) {
+        icon = '<i class="fas fa-battery-quarter"></i>';
+        color = '#ff4444';
+    } else if (level <= 50) {
+        icon = '<i class="fas fa-battery-half"></i>';
+        color = '#ffa500';
+    } else if (level <= 80) {
+        icon = '<i class="fas fa-battery-three-quarters"></i>';
+        color = '#90EE90';
+    } else {
+        icon = '<i class="fas fa-battery-full"></i>';
+        color = '#00C851';
+    }
+
+    // Mettre à jour l'icône et les styles
+    batteryIcon.innerHTML = icon;
+    batteryIcon.style.color = color;
+    batteryLevel.style.color = color;
+
+    // Mettre à jour les classes
+    batteryStatus.className = 'battery-status';
+    if (level <= 20 && !isCharging) {
+        batteryStatus.classList.add('low');
+    }
+    if (isCharging) {
+        batteryStatus.classList.add('charging');
+    }
+}
+
+// Initialiser au chargement de la page
+document.addEventListener('DOMContentLoaded', () => {
+    // Vérifier si les éléments existent
+    const batteryElements = document.querySelector('.battery-status');
+    if (!batteryElements) {
+        console.error('Éléments de batterie non trouvés dans le DOM');
+        return;
+    }
+
+    initBatteryStatus();
+
+    // Arrêter toute rotation au chargement initial
+    const quranIcon = document.getElementById('quranIcon');
+    quranIcon.classList.remove('rotating');
 });
+
+// Ajoutez cette fonction pour gérer l'animation
+function handleQuranIconAnimation() {
+    const audioElement = document.querySelector('audio');
+    const quranIcon = document.querySelector('.quran-icon');
+
+    audioElement.addEventListener('play', () => {
+        quranIcon.classList.add('rotating');
+    });
+
+    audioElement.addEventListener('pause', () => {
+        quranIcon.classList.remove('rotating');
+    });
+
+    audioElement.addEventListener('ended', () => {
+        quranIcon.classList.remove('rotating');
+    });
+}
+
+// Ajoutez cette fonction dans votre fichier script.js
+function setupAudioPlayer(audioElement) {
+    const quranIcon = document.getElementById('quranIcon');
+    
+    // Retirer toute animation existante
+    quranIcon.style.animation = 'none';
+    quranIcon.classList.remove('active');
+    
+    // Gérer les événements audio
+    audioElement.addEventListener('play', function() {
+        quranIcon.style.animation = '';  // Réinitialiser le style inline
+        quranIcon.classList.add('active');
+    });
+
+    audioElement.addEventListener('pause', function() {
+        quranIcon.classList.remove('active');
+    });
+
+    audioElement.addEventListener('ended', function() {
+        quranIcon.classList.remove('active');
+    });
+}
+
+// Modifiez votre fonction createAudioElement
+function createAudioElement(audioUrl) {
+    const audioContainer = document.querySelector('.audio-container');
+    audioContainer.innerHTML = '';
+
+    const audio = document.createElement('audio');
+    audio.controls = true;
+    audio.src = audioUrl;
+    
+    const quranIcon = document.getElementById('quranIcon');
+
+    // Gérer la lecture
+    audio.addEventListener('play', () => {
+        quranIcon.style.animation = 'spin 3s linear infinite';
+    });
+
+    // Gérer la pause
+    audio.addEventListener('pause', () => {
+        quranIcon.style.animation = 'none';
+    });
+
+    // Gérer la fin
+    audio.addEventListener('ended', () => {
+        quranIcon.style.animation = 'none';
+    });
+
+    audioContainer.appendChild(audio);
+    return audio;
+}
+
+// Ajouter cette fonction
+function showUpdateMessage() {
+    const message = document.createElement('div');
+    message.style.cssText = `
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: #4CAF50;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 5px;
+        z-index: 1000;
+    `;
+    message.textContent = 'تم تحديث التطبيق! جاري إعادة التحميل...';
+    document.body.appendChild(message);
+    
+    setTimeout(() => {
+        window.location.reload();
+    }, 2000);
+}

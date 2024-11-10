@@ -2,36 +2,114 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>القرآن الكريم</title>
-    <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <script src="https://kit.fontawesome.com/YOUR_KIT_CODE.js" crossorigin="anonymous"></script>
-    <link rel="manifest" href="/manifest.json">
-    <meta name="theme-color" content="#1a4a1c">
-    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <!-- SEO Meta Tags -->
+    <title>وَذَكِّرْ - Wa Dakkir | Coran en ligne | القرآن الكريم</title>
+    <meta name="description" content="وَذَكِّرْ - Écoutez le Coran en ligne avec les meilleurs récitateurs. قراءة القرآن الكريم بصوت كبار القراء. Wa Dakkir - Listen to Quran online with the best reciters.">
+    <meta name="keywords" content="
+        وَذَكِّرْ, 
+        wa dakkir, 
+        wadakkir,
+        wa-dakkir,
+        coran en ligne, 
+        quran online, 
+        القرآن الكريم,
+        قراء القرآن,
+        استماع القران,
+        تلاوات,
+        مصحف,
+        قران اون لاين,
+        récitation coranique,
+        quran reciters,
+        holy quran,
+        islamic audio,
+        coran audio,
+        مصحف مرتل
+    ">
+    
+    <!-- Open Graph Meta Tags pour les réseaux sociaux -->
+    <meta property="og:title" content="وَذَكِّرْ - Wa Dakkir | Coran en ligne">
+    <meta property="og:description" content="Écoutez le Coran en ligne avec les meilleurs récitateurs. قراءة القرآن الكريم بصوت كبار القراء">
+    <meta property="og:image" content="https://wa-dakkir.web.app/images/logo-wadakir1.png">
+    <meta property="og:url" content="https://wa-dakkir.web.app/">
+    <meta property="og:type" content="website">
+    
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="المكتبة الإسلامية">
+    <meta name="twitter:description" content="كنوز من أمهات الكتب وروائع المؤلفات">
+    <meta name="twitter:image" content="https://wa-dakkir.web.app/images/logo-wadakir1.png">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="images/logo-wadakir1.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="images/logo-wadakir1.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="images/logo-wadakir1.png">
+    <link rel="stylesheet" href="style.css?v=1.0.3">
+    <!-- Ajouter dans le <head> -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://wa-dakkir.web.app/">
+    
+    <!-- Autres meta tags existants -->
+    <meta name="google-site-verification" content="2kcrkT4DH8u4I6zmDcVYMTdXUJ8UopMWl6ae5OVO4Ew" />
+    <meta name="theme-color" content="#ffffff">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
 </head>
 <body>
     <header>
-        <h1>المكتبة الإسلامية</h1>
-        <p class="subtitle">كنوز من أمهات الكتب وروائع المؤلفات</p>
-        <div class="categories-filter">
-            <button class="filter-btn active" data-category="all">الكل</button>
+        <img src="images/logo-wadakir.png" alt="Logo" class="logo logo1">
+        <img src="images/logo-wadakir.png" alt="Logo" class="logo logo2">
+        <h1>سكون القلب</h1>
+        <p class="subtitle">لحظات من الصفاء مع كل تلاوة ومعنى</p>
+        <p class="all-reciters">جميع القراء في مكان واحد</p>
+        <div class="categories-filter" style="display: none;">
+            
+            <button class="filter-btn" data-category="all">الكل</button>
             <button class="filter-btn" data-category="عقيدة">العقيدة</button>
             <button class="filter-btn" data-category="فقه">الفقه</button>
             <button class="filter-btn" data-category="تزكية">التزكية</button>
             <button class="filter-btn" data-category="فكر">الفكر</button>
-            <button class="filter-btn" data-category="أدب">الأدب</button>
+            
+        </div>
+        <div class="theme-switch-wrapper" style="display: none;">
+            <label class="theme-switch">
+                <input type="checkbox" id="themeToggle">
+                <span class="slider round">
+                    <span class="moon">🌙</span>
+                    <span class="sun">☀️</span>
+                </span>
+            </label>
+        </div>
+        <div class="battery-status">
+            <span class="battery-icon">🔋</span>
+            <span class="battery-level">--</span>
         </div>
     </header>
 
     <main class="container">
         <section class="quran-section">
-            <h2>اختر القارئ والسورة</h2>
             
+            <h2>
+                اختر السورة والقارئ
+                <img src="images/quran.png" alt="Quran Icon" class="quran-icon" id="quranIcon" style="display: none;">
+            </h2>
+            <div class="select-wrapper">
+                <div class="search-container">
+                    <input 
+                        type="text" 
+                        id="searchReciter" 
+                        placeholder="ابحث عن القارئ..." 
+                        class="search-input"
+                    >
+                </div>
+            </div>
             <div class="quran-controls">
                 <div class="select-wrapper">
+                    
                     <label for="chooseReciter">اختر القارئ</label>
                     <select id="chooseReciter" class="quran-select">
                         <!-- Options will be added dynamically -->
@@ -52,32 +130,9 @@
                 </div>
             </div>
 
-            <div class="audio-player">
-                <audio id="chooseAudio" style="display: none;">
-                    Votre navigateur ne supporte pas l'élément audio.
-                </audio>
-                
-                <div class="player-controls">
-                    <div class="additional-controls">
-                        
-                        
-                        <button id="playBtn" class="player-btn">
-                            ▶
-                        </button>
-                        
-                    </div>
-                    
-                    <div class="progress-bar">
-                        <div class="progress"></div>
-                    </div>
-                    
-                    <div class="volume-control">
-                        <i class="fas fa-volume-up"></i>
-                        <input type="range" class="volume-slider" min="0" max="100" value="100">
-                    </div>
-                    
-                    <span class="time-display">00:00 / 00:00</span>
-                </div>
+            <!-- Conteneur pour l'audio -->
+            <div class="audio-container">
+                <!-- L'audio sera inséré ici dynamiquement -->
             </div>
         </section>
     </main>
@@ -104,7 +159,7 @@
         const app = initializeApp(firebaseConfig);
         const analytics = getAnalytics(app);
       </script>
-    <script src="script.js"></script>
+    <script src="script.js?v=1.0.3"></script>
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
@@ -118,5 +173,150 @@
             });
         }
     </script>
+    <style>
+        .audio-player {
+            width: 300px;
+            margin: 20px auto;
+            background-color: #f3f3f3;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+
+        .player-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .play-button {
+            background-color: #007bff;
+            border: none;
+            color: white;
+            padding: 10px;
+            border-radius: 50%;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+
+        .play-button .play-icon {
+            font-size: 20px;
+        }
+
+        .player-controls {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .time-display {
+            font-size: 14px;
+            color: #333;
+        }
+
+        .progress-container {
+            flex-grow: 1;
+            margin: 0 10px;
+            position: relative;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 5px;
+            background-color: #ddd;
+            border-radius: 5px;
+            position: relative;
+        }
+
+        .progress {
+            width: 0;
+            height: 100%;
+            background-color: #007bff;
+            border-radius: 5px;
+        }
+
+        .progress-handle {
+            width: 10px;
+            height: 10px;
+            background-color: #007bff;
+            border-radius: 50%;
+            position: absolute;
+            top: -2.5px;
+            left: 0;
+            cursor: pointer;
+        }
+
+        .volume-control {
+            display: flex;
+            align-items: center;
+        }
+
+        .volume-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            margin-right: 5px;
+        }
+
+        .volume-slider-container {
+            width: 100px;
+        }
+
+        .volume-slider {
+            width: 100%;
+        }
+
+        .audio-container {
+            width: 100%;
+            max-width: 500px;
+            margin: 20px auto;
+            padding: 10px;
+        }
+
+        /* Personnalisation des contrôles audio */
+        audio {
+            width: 100%;
+            height: 40px;
+            border-radius: 8px;
+        }
+
+        /* Style pour Webkit (Chrome, Safari) */
+        audio::-webkit-media-controls-panel {
+            background-color: #f3f3f3;
+        }
+
+        audio::-webkit-media-controls-play-button {
+            background-color: #007bff;
+            border-radius: 50%;
+        }
+
+        audio::-webkit-media-controls-current-time-display,
+        audio::-webkit-media-controls-time-remaining-display {
+            color: #333;
+        }
+
+        /* Style pour Firefox */
+        audio::-moz-media-controls-panel {
+            background-color: #f3f3f3;
+        }
+    </style>
+    <footer class="footer">
+        <div class="footer-content">
+            <p class="copyright">
+                تم تطويره بواسطة 
+                <span class="developer-name">وحيد صمراني</span>
+                <span class="year">© 2024</span>
+            </p>
+            <div class="social-links">
+                <a href="https://github.com/SamraniOuahid" target="_blank" title="GitHub">
+                    <i class="fab fa-github"></i>
+                </a>
+                <a href="https://www.linkedin.com/in/ouahid-samrani-1a104b231/" target="_blank" title="LinkedIn">
+                    <i class="fab fa-linkedin"></i>
+                </a>
+            </div>
+        </div>
+    </footer>
 </body>
 </html>

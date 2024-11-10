@@ -29,6 +29,23 @@ header {
     text-align: center;
     overflow: hidden;
 }
+header .logo{
+    height: 250px;
+    position: absolute;
+    top: 10px;
+    left: 10px;
+}
+header .logo2{
+    right: 10px;
+}
+@media(max-width: 768px){
+    header .logo {
+        height: 70px;
+        top: 10px;
+        
+    }
+    
+}
 
 header::before {
     content: '';
@@ -84,19 +101,27 @@ header h1 {
 }
 
 .quran-section h2 {
-    color: var(--primary-color);
-    font-size: 2.5rem;
     text-align: center;
     margin-bottom: 2rem;
-    position: relative;
 }
 
-.quran-section h2::after {
-    content: '۞';
+.quran-icon {
     display: block;
-    color: var(--gold);
-    font-size: 2rem;
-    margin-top: 0.5rem;
+    width: 60px;
+    height: 60px;
+    margin: 1rem auto 0;
+    object-fit: contain;
+    animation: rotate 3s linear infinite;
+}
+
+/* Animation de rotation */
+@keyframes rotate {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 /* Controls Style */
@@ -151,41 +176,56 @@ header h1 {
     margin: 20px auto;
 }
 
-.player-controls {
+.player-container {
     display: flex;
-    align-items: center;
+    flex-direction: column;
     gap: 20px;
-    position: relative;
+    padding: 15px;
 }
 
-/* Bouton Play/Pause */
-.player-btn {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
+.play-button {
+    background-color: #007bff;
     border: none;
-    background: linear-gradient(145deg, #1a4a1c, #2c5f2e);
     color: white;
+    padding: 10px;
+    border-radius: 50%;
     cursor: pointer;
+    margin-bottom: 10px;
+    transition: background-color 0.3s ease; /* Animation douce */
+}
+
+.play-button:hover {
+    opacity: 0.9;
+}
+
+.play-button .play-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(26, 74, 28, 0.3);
 }
 
-.player-btn:hover {
-    transform: scale(1.05);
-    box-shadow: 0 6px 20px rgba(26, 74, 28, 0.4);
+.play-button:active {
+    transform: scale(0.95);
 }
 
-.player-btn i {
+.play-icon {
     font-size: 1.5rem;
-    transition: all 0.3s ease;
+}
+
+/* Contrôles du lecteur */
+.player-controls {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    width: 100%;
+    margin-top: 10px;
 }
 
 /* Barre de progression */
-.progress-bar {
+.progress-container {
     flex: 1;
     height: 8px;
     background: rgba(0, 0, 0, 0.1);
@@ -195,25 +235,47 @@ header h1 {
     overflow: hidden;
 }
 
+.progress-bar {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
 .progress {
     position: absolute;
     left: 0;
     top: 0;
     height: 100%;
-    background: linear-gradient(90deg, #1a4a1c, #2c5f2e);
+    background: var(--primary-color);
     border-radius: 4px;
     transition: width 0.1s linear;
 }
 
-.progress-bar:hover::before {
-    content: '';
+.progress-handle {
     position: absolute;
-    top: -2px;
-    left: 0;
-    right: 0;
-    bottom: -2px;
-    background: rgba(26, 74, 28, 0.1);
-    border-radius: 4px;
+    top: 50%;
+    width: 16px;
+    height: 16px;
+    background: white;
+    border: 3px solid var(--primary-color);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    cursor: grab;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s ease;
+}
+
+.progress-handle:hover {
+    transform: translate(-50%, -50%) scale(1.2);
+}
+
+/* Affichage du temps */
+.time-display {
+    font-family: monospace;
+    font-size: 0.9rem;
+    color: var(--dark);
+    min-width: 45px;
+    text-align: center;
 }
 
 /* Contrôle du volume */
@@ -221,25 +283,28 @@ header h1 {
     display: flex;
     align-items: center;
     gap: 10px;
-    min-width: 120px;
+    position: relative;
 }
 
-.volume-control i {
-    color: #1a4a1c;
+.volume-btn {
+    background: none;
+    border: none;
     cursor: pointer;
-    transition: color 0.3s ease;
+    padding: 5px;
+    color: var(--dark);
 }
 
-.volume-control i:hover {
-    color: #2c5f2e;
+.volume-slider-container {
+    width: 80px;
+    position: relative;
 }
 
 .volume-slider {
-    width: 80px;
-    height: 4px;
     -webkit-appearance: none;
-    background: rgba(0, 0, 0, 0.1);
+    width: 100%;
+    height: 4px;
     border-radius: 2px;
+    background: rgba(0, 0, 0, 0.1);
     outline: none;
 }
 
@@ -247,54 +312,64 @@ header h1 {
     -webkit-appearance: none;
     width: 12px;
     height: 12px;
-    background: #1a4a1c;
     border-radius: 50%;
+    background: var(--primary-color);
     cursor: pointer;
-    transition: all 0.3s ease;
+    border: 2px solid white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-.volume-slider::-webkit-slider-thumb:hover {
-    transform: scale(1.2);
+/* Mode sombre */
+[data-theme="dark"] .audio-player {
+    background: linear-gradient(145deg, #2d2d2d, #1a1a1a);
 }
 
-.volume-slider::-moz-range-thumb {
-    width: 12px;
-    height: 12px;
-    background: #1a4a1c;
-    border-radius: 50%;
-    cursor: pointer;
-    border: none;
-    transition: all 0.3s ease;
+[data-theme="dark"] .play-button {
+    background: var(--secondary-color);
 }
 
-/* Affichage du temps */
-.time-display {
-    font-family: 'Amiri', serif;
-    color: #1a4a1c;
-    font-size: 0.9rem;
-    min-width: 100px;
-    text-align: center;
+[data-theme="dark"] .time-display {
+    color: #fff;
 }
 
-/* Ajout de boutons supplémentaires */
-.additional-controls {
-    display: flex;
-    gap: 10px;
-    margin-right: 15px;
+[data-theme="dark"] .volume-btn {
+    color: #fff;
 }
 
-.control-btn {
-    background: transparent;
-    border: none;
-    color: #1a4a1c;
-    cursor: pointer;
-    padding: 5px;
-    border-radius: 50%;
-    transition: all 0.3s ease;
+/* Media Queries */
+@media (max-width: 768px) {
+    .player-controls {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .progress-container {
+        min-width: 100%;
+        order: -1;
+    }
+
+    .volume-control {
+        min-width: 120px;
+    }
+
+    .time-display {
+        min-width: 60px;
+    }
 }
 
-.control-btn:hover {
-    background: rgba(26, 74, 28, 0.1);
+@media (max-width: 480px) {
+    .audio-player {
+        padding: 15px;
+    }
+
+    .player-container {
+        gap: 15px;
+    }
+
+    .volume-slider-container {
+        width: 60px;
+    }
 }
 
 /* Responsive Design */
@@ -304,7 +379,7 @@ header h1 {
     }
 
     header h1 {
-        font-size: 2.5rem;
+        font-size: 2rem;
     }
 
     .subtitle {
@@ -379,3 +454,552 @@ header h1 {
 ::-webkit-scrollbar-thumb:hover {
     background: var(--secondary-color);
 }
+
+.search-container {
+    position: relative;
+    max-width: 400px;
+    margin: 20px auto;
+}
+
+.search-input {
+    width: 100%;
+    padding: 12px 45px 12px 15px;
+    border: 2px solid #e0e0e0;
+    border-radius: 25px;
+    font-size: 16px;
+    background-color: #f8f9fa;
+    color: #333;
+    transition: all 0.3s ease;
+    direction: rtl;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.search-input::placeholder {
+    color: #aab7c4;
+    font-size: 15px;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: #4CAF50;
+    box-shadow: 0 3px 8px rgba(76,175,80,0.2);
+    background-color: #fff;
+}
+
+/* Ajouter une icône de recherche */
+.search-container::after {
+    content: "🔍";
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #aab7c4;
+    font-size: 18px;
+    pointer-events: none;
+}
+
+/* Animation au survol */
+.search-input:hover {
+    border-color: #9e9e9e;
+    background-color: #fff;
+}
+
+/* Style pour mobile */
+@media screen and (max-width: 480px) {
+    .search-container {
+        max-width: 100%;
+        margin: 15px auto;
+    }
+
+    .search-input {
+        padding: 10px 40px 10px 12px;
+        font-size: 14px;
+    }
+
+    .search-input::placeholder {
+        font-size: 13px;
+    }
+}
+
+.categories-filter {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin: 20px 0;
+}
+
+.filter-btn {
+    padding: 10px 20px;
+    border: 2px solid #1a4a1c;
+    border-radius: 25px;
+    background: transparent;
+    color: #1a4a1c;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    background-color: white;
+}
+
+/* Effet hover */
+.filter-btn:hover {
+    background-color: white;
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(26, 74, 28, 0.2);
+}
+
+/* Effet click */
+.filter-btn:active {
+    transform: translateY(1px);
+}
+
+/* Style pour le bouton actif */
+.filter-btn.active {
+    background: #1a4a1c;
+    color: white;
+    animation: pulse 1.5s infinite;
+}
+
+/* Animation de pulsation pour le bouton actif */
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(26, 74, 28, 0.4);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(26, 74, 28, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(26, 74, 28, 0);
+    }
+}
+
+/* Effet ripple au clic */
+.filter-btn::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.3s, height 0.3s;
+}
+
+.filter-btn:active::after {
+    width: 200px;
+    height: 200px;
+    opacity: 0;
+}
+
+/* Animation pour l'apparition des boutons */
+.filter-btn {
+    animation: fadeInUp 0.5s ease forwards;
+    opacity: 0;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Délai d'animation pour chaque bouton */
+.filter-btn:nth-child(1) { animation-delay: 0.1s; }
+.filter-btn:nth-child(2) { animation-delay: 0.2s; }
+.filter-btn:nth-child(3) { animation-delay: 0.3s; }
+.filter-btn:nth-child(4) { animation-delay: 0.4s; }
+.filter-btn:nth-child(5) { animation-delay: 0.5s; }
+.filter-btn:nth-child(6) { animation-delay: 0.6s; }
+
+/* Styles de base */
+.container {
+    max-width: 100%;
+    padding: 15px;
+    margin: 0 auto;
+}
+
+.main-content {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Style pour les sélecteurs */
+.select-container {
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+select, .search-input {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    font-size: 16px;
+}
+
+/* Style pour le lecteur audio */
+audio {
+    width: 100%;
+    max-width: 400px;
+    margin: 20px auto;
+}
+
+/* Media Queries pour différentes tailles d'écran */
+@media screen and (max-width: 768px) {
+    body {
+        font-size: 14px;
+    }
+
+    .header {
+        padding: 10px;
+    }
+
+    .header h1 {
+        font-size: 24px;
+    
+
+    select, .search-input {
+        font-size: 14px;
+        padding: 8px;
+    }
+}}
+@media screen and (max-width: 480px) {
+    .container {
+        padding: 10px;
+    }
+
+    .header h1 {
+        font-size: 20px;
+    }
+
+    select, .search-input {
+        font-size: 13px;
+        padding: 6px;
+    }
+
+    .select-container {
+        max-width: 100%;
+    }
+}
+
+/* Ajustements pour les très petits écrans */
+@media screen and (max-width: 320px) {
+    .header h1 {
+        font-size: 18px;
+    }
+
+    .container {
+        padding: 5px;
+    }
+}
+
+/* Styles pour l'orientation paysage sur mobile */
+@media screen and (max-height: 480px) and (orientation: landscape) {
+    .container {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .main-content {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .select-container {
+        flex: 1;
+        min-width: 250px;
+    }
+}
+
+/* Styles pour assurer la lisibilité du texte arabe */
+[lang="ar"] {
+    font-family: "Arial", sans-serif;
+    line-height: 1.5;
+    text-align: right;
+}
+
+/* Styles pour améliorer l'accessibilité */
+select:focus, 
+.search-input:focus {
+    outline: 2px solid #007bff;
+    outline-offset: 2px;
+}
+
+/* Animation de chargement si nécessaire */
+.loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100px;
+}
+
+.audio-container {
+    width: 100%;
+    max-width: 500px;
+    margin: 20px auto;
+    padding: 10px;
+}
+
+/* Personnalisation des contrôles audio */
+audio {
+    width: 100%;
+    height: 40px;
+    border-radius: 8px;
+}
+
+/* Style pour Webkit (Chrome, Safari) */
+audio::-webkit-media-controls-panel {
+    background-color: #f3f3f3;
+}
+
+audio::-webkit-media-controls-play-button {
+    background-color: #007bff;
+    border-radius: 50%;
+}
+
+audio::-webkit-media-controls-current-time-display,
+audio::-webkit-media-controls-time-remaining-display {
+    color: #333;
+}
+/* Style pour Firefox */
+audio::-moz-media-controls-panel {
+    background-color: #f3f3f3;
+}
+
+/* Styles pour l'indicateur de batterie */
+.battery-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 15px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    z-index: 1000;
+}
+
+.battery-status:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+}
+
+.battery-icon {
+    font-size: 18px;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.3s ease;
+}
+
+.battery-level {
+    font-size: 14px;
+    font-weight: 600;
+    min-width: 45px;
+    text-align: center;
+    transition: color 0.3s ease;
+}
+
+/* Animation pour batterie faible */
+.battery-status.low .battery-icon,
+.battery-status.low .battery-level {
+    animation: pulse 2s infinite;
+}
+
+/* Animation pour la charge */
+.battery-status.charging .battery-icon {
+    animation: charging 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+@keyframes charging {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+/* Mode sombre */
+@media (prefers-color-scheme: dark) {
+    .battery-status {
+        background: rgba(0, 0, 0, 0.3);
+        border-color: rgba(255, 255, 255, 0.1);
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .battery-status {
+        top: 10px;
+        left: 10px;
+        padding: 6px 12px;
+    }
+
+    .battery-icon {
+        font-size: 16px;
+    }
+
+    .battery-level {
+        font-size: 12px;
+    }
+}
+
+.footer {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    padding: 40px 0;
+    margin-top: 50px;
+    width: 100%;
+    position: relative;
+    color: var(--cream);
+    overflow: hidden;
+}
+
+.footer::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url('path/to/islamic-pattern.png');
+    opacity: 0.1;
+    pointer-events: none;
+}
+
+.footer-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    gap: 20px;
+    text-align: center;
+    position: relative;
+    z-index: 1;
+}
+
+.copyright {
+    font-size: 1.1rem;
+    color: var(--cream);
+    margin: 0;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+}
+
+.developer-name {
+    font-weight: bold;
+    color: var(--gold);
+    margin: 0 5px;
+    transition: color 0.3s ease;
+}
+
+.developer-name:hover {
+    color: var(--cream);
+}
+
+.year {
+    color: var(--cream);
+    opacity: 0.9;
+}
+
+.social-links {
+    display: flex;
+    gap: 20px;
+    
+}
+
+.social-links a {
+    color: var(--cream);
+    font-size: 24px;
+    transition: all 0.3s ease;
+    padding: 10px;
+    
+}
+
+.social-links a:hover {
+    color: var(--gold);
+    transform: translateY(-3px);
+    border-radius: 50%;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .footer {
+        padding: 30px 0;
+    }
+
+    .copyright {
+        font-size: 1rem;
+    }
+
+    .social-links a {
+        font-size: 20px;
+        padding: 8px;
+    }
+}
+
+.all-reciters {
+    color: var(--cream);
+    margin: 10px auto;
+}
+
+/* Ajoutez ces styles CSS */
+.quran-icon {
+    width: 30px;
+    height: 30px;
+    vertical-align: middle;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.quran-icon.spinning {
+    animation: spin 3s linear infinite;
+}
+
+.custom-controls {
+    margin-top: 10px;
+    text-align: center;
+}
+
+.play-button {
+    padding: 10px;
+    border-radius: 50%;
+    border: none;
+    background: #007bff;
+    color: white;
+    cursor: pointer;
+}
+
+.play-button:hover {
+    background: #0056b3;
+}
+

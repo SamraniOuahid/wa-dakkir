@@ -117,16 +117,16 @@ async function getMoshaf(reciterId) {
                 </option>`;
         });
 
-        // Sélectionner automatiquement le premier moshaf
-        if (moshafs.length > 0) {
-            const firstMoshaf = chooseMoshaf.querySelector('option:not(:first-child)');
-            if (firstMoshaf) {
-                firstMoshaf.selected = true;
-                const surahServer = firstMoshaf.dataset.server;
-                const surahList = firstMoshaf.dataset.surahlist;
+        // Ajouter un écouteur d'événements pour le changement de moshaf
+        chooseMoshaf.addEventListener('change', function(e) {
+            if (e.target.value) {
+                const selectedOption = e.target.selectedOptions[0];
+                const surahServer = selectedOption.dataset.server;
+                const surahList = selectedOption.dataset.surahlist;
                 getSurah(surahServer, surahList);
             }
-        }
+        });
+
     } catch (error) {
         console.error('Erreur lors du chargement des moshaf:', error);
     }
